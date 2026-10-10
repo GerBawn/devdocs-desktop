@@ -1,9 +1,9 @@
 const path = require('path')
-const { app, Menu, Tray } = require('electron')
+const {app, Menu, Tray} = require('electron')
 
 let tray = null
 
-exports.create = win => {
+exports.create = (win) => {
   if (process.platform === 'darwin' || tray) {
     return
   }

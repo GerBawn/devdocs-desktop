@@ -35,30 +35,54 @@
   },
   "homepage": "https://github.com/GerBawn/devdocs-desktop#readme",
   "devDependencies": {
-    "@egoist/prettier-config": "^0.1.0",
-    "@electron/notarize": "^2.5.0",
-    "dotenv": "^16.4.7",
+    "@electron/notarize": "^3.1.2",
+    "dotenv": "^18.0.7",
     "electron": "^44.7.0",
     "electron-builder": "^26.15.3",
-    "eslint-config-rem": "^4.0.0",
-    "minimist": "^1.2.8",
-    "prettier": "^1.19.1",
-    "xo": "^0.27.2"
+    "prettier": "^3.9.10",
+    "xo": "^0.60.0"
   },
   "xo": {
-    "extends": "rem",
+    "space": true,
+    "prettier": true,
     "envs": [
       "browser",
       "node"
     ],
+    "ignores": [
+      "dist/**",
+      "app/renderer/*.html"
+    ],
     "rules": {
-      "guard-for-in": 0,
+      "camelcase": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/no-null": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-node-protocol": "off",
+      "unicorn/prefer-top-level-await": "off",
+      "n/prefer-global/process": "off",
+      "import/no-unassigned-import": "off",
+      "import/extensions": "off",
+      "import/order": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }
+      ],
+      "guard-for-in": "off",
       "max-params": [
         "error",
         5
       ],
-      "import/order": "off",
-      "comma-dangle": "off"
+      "comma-dangle": "off",
+      "capitalized-comments": "off",
+      "unicorn/filename-case": "off",
+      "unicorn/prefer-event-target": "off",
+      "unicorn/no-anonymous-default-export": "off",
+      "object-shorthand": "off",
+      "prettier/prettier": "error"
     }
   },
   "build": {
@@ -79,11 +103,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ]
     },

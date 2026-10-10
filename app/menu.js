@@ -1,13 +1,7 @@
-const {
-  Menu,
-  shell,
-  globalShortcut,
-  BrowserWindow,
-  dialog
-} = require('electron')
+const {Menu, shell, globalShortcut, BrowserWindow, dialog} = require('electron')
 const axios = require('axios')
-const semverCompare = require('semver-compare')
-const { configDir, toggleGlobalShortcut } = require('./utils')
+const semver = require('semver')
+const {configDir, toggleGlobalShortcut} = require('./utils')
 const config = require('./config')
 const pkg = require('./package.json')
 
@@ -32,9 +26,8 @@ function updateMenu(opts) {
 function createMenu(opts) {
   const toggleAppAccelerator =
     config.get('shortcut.toggleApp') || 'CmdOrCtrl+Shift+D'
-  const toggleAppAcceleratorRegistered = globalShortcut.isRegistered(
-    toggleAppAccelerator
-  )
+  const toggleAppAcceleratorRegistered =
+    globalShortcut.isRegistered(toggleAppAccelerator)
 
   const preferences = [
     {
@@ -81,10 +74,13 @@ function createMenu(opts) {
       const api =
         'https://api.github.com/repos/GerBawn/devdocs-desktop/releases/latest'
       try {
-        const latest = await axios.get(api).then(res => res.data)
+        const latest = await axios.get(api).then((res) => res.data)
 
-        if (semverCompare(latest.tag_name.slice(1), pkg.version) === 1) {
-          const { response } = await dialog.showMessageBox(focusedWindow, {
+        if (
+          semver.valid(latest.tag_name.slice(1)) &&
+          semver.gt(latest.tag_name.slice(1), pkg.version)
+        ) {
+          const {response} = await dialog.showMessageBox(focusedWindow, {
             type: 'info',
             message: 'New updates!',
             detail: `A new release (${latest.tag_name}) is available, view more details?`,

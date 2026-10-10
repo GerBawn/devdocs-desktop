@@ -48,6 +48,8 @@ Use <kbd>Ctrl+Shift+D</kbd> (or <kbd>Command+Shift+D</kbd> on macOS) to toggle t
 
 需要 **Node.js 22.12+**（Electron 44 要求；推荐 Node 22 LTS）。
 
+依赖升级说明与刻意 pin 的包见 [docs/dependency-notes.md](./docs/dependency-notes.md)。
+
 ```bash
 git clone https://github.com/GerBawn/devdocs-desktop.git
 cd devdocs-desktop

@@ -12,8 +12,8 @@ require('dotenv').config()
  * Also requires a valid Developer ID Application certificate in the keychain
  * (or CSC_LINK / CSC_KEY_PASSWORD for CI).
  */
-exports.default = async context => {
-  const { electronPlatformName, appOutDir } = context
+exports.default = async (context) => {
+  const {electronPlatformName, appOutDir} = context
   if (electronPlatformName !== 'darwin') {
     return
   }
@@ -30,12 +30,11 @@ exports.default = async context => {
     return
   }
 
-  const { notarize } = require('@electron/notarize')
+  // @electron/notarize@3 is ESM-only
+  const {notarize} = await import('@electron/notarize')
   const appName = context.packager.appInfo.productFilename
 
   await notarize({
-    tool: 'notarytool',
-    appBundleId: 'sh.egoist.devdocs',
     appPath: `${appOutDir}/${appName}.app`,
     appleId,
     appleIdPassword,

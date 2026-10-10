@@ -1,7 +1,7 @@
-const { ipcRenderer: ipc } = require('electron')
+const {ipcRenderer: ipc} = require('electron')
 const config = require('../config')
 
-document.addEventListener('change', e => {
+document.addEventListener('change', (e) => {
   if (e.target.name === 'dark') {
     switchMode(e.target.checked)
   }

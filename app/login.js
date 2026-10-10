@@ -1,8 +1,8 @@
-const { BrowserWindow, ipcMain } = require('electron')
+const {BrowserWindow, ipcMain} = require('electron')
 const path = require('path')
 const debug = require('debug')('devdocs-desktop:login')
 
-module.exports = cb => {
+module.exports = (cb) => {
   debug('Login launching...')
   const loginWindow = new BrowserWindow({
     width: 300,
