@@ -13,13 +13,15 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "test": "npm run lint",
-    "lint": "xo",
+    "lint": "eslint .",
     "app": "DEBUG=devdocs-desktop:* electron app/index.js",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:mac:unsigned": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac",
-    "release": "electron-builder"
+    "release": "electron-builder",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -36,54 +38,14 @@
   "homepage": "https://github.com/GerBawn/devdocs-desktop#readme",
   "devDependencies": {
     "@electron/notarize": "^3.1.2",
+    "@eslint/js": "^10.0.1",
     "dotenv": "^18.0.7",
     "electron": "^44.7.0",
     "electron-builder": "^26.15.3",
-    "prettier": "^3.9.10",
-    "xo": "^0.60.0"
-  },
-  "xo": {
-    "space": true,
-    "prettier": true,
-    "envs": [
-      "browser",
-      "node"
-    ],
-    "ignores": [
-      "dist/**",
-      "app/renderer/*.html"
-    ],
-    "rules": {
-      "camelcase": "off",
-      "unicorn/prevent-abbreviations": "off",
-      "unicorn/no-null": "off",
-      "unicorn/prefer-module": "off",
-      "unicorn/prefer-node-protocol": "off",
-      "unicorn/prefer-top-level-await": "off",
-      "n/prefer-global/process": "off",
-      "import/no-unassigned-import": "off",
-      "import/extensions": "off",
-      "import/order": "off",
-      "no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_"
-        }
-      ],
-      "guard-for-in": "off",
-      "max-params": [
-        "error",
-        5
-      ],
-      "comma-dangle": "off",
-      "capitalized-comments": "off",
-      "unicorn/filename-case": "off",
-      "unicorn/prefer-event-target": "off",
-      "unicorn/no-anonymous-default-export": "off",
-      "object-shorthand": "off",
-      "prettier/prettier": "error"
-    }
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.0.0",
+    "prettier": "^3.9.10"
   },
   "build": {
     "appId": "sh.egoist.devdocs",
@@ -136,5 +98,8 @@
         "tar.xz"
       ]
     }
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

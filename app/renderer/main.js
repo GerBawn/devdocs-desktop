@@ -7,7 +7,7 @@ const {configDir} = require('../utils')
 const config = require('../config')
 const Searcher = require('./searcher')
 
-let webview // eslint-disable-line prefer-const
+let webview
 
 function ensureCustomFiles() {
   fs.mkdirSync(configDir(), {recursive: true})
