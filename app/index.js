@@ -83,45 +83,13 @@ function createMainWindow() {
   return win
 }
 
-async function setupDevtoolsAndContextMenu() {
-  // ESM-only packages (Electron 44+); load via dynamic import from CJS main.
-  const [{default: enableDebug}, {default: contextMenu}] = await Promise.all([
-    import('electron-debug'),
-    import('electron-context-menu')
-  ])
-
-  enableDebug()
-
-  contextMenu({
-    showInspectElement: true,
-    prepend: (_defaultActions, parameters) => {
-      const selection =
-        parameters.selectionText && parameters.selectionText.trim()
-      const hasText = Boolean(selection)
-      return [
-        {
-          id: 'searchGoogle',
-          label: 'Search in Google',
-          visible: hasText,
-          click() {
-            shell.openExternal(
-              `https://www.google.com/search?q=${encodeURIComponent(selection)}`
-            )
-          }
-        },
-        {
-          id: 'searchDuck',
-          label: 'Search in DuckDuckGo',
-          visible: hasText,
-          click() {
-            shell.openExternal(
-              `https://duckduckgo.com/?q=${encodeURIComponent(selection)}`
-            )
-          }
-        }
-      ]
-    }
-  })
+function setupDevtoolsAndContextMenu() {
+  // Local helpers — do not use electron-debug / electron-context-menu
+  // (they depend on electron-is-dev, which breaks in packaged builds).
+  const {registerDevShortcuts} = require('./dev-shortcuts')
+  const {registerContextMenu} = require('./context-menu')
+  registerDevShortcuts()
+  registerContextMenu({showInspectElement: !app.isPackaged})
 }
 
 app.on(
@@ -161,8 +129,8 @@ ipcMain.on('window-set-title', (event, title) => {
   }
 })
 
-app.on('ready', async () => {
-  await setupDevtoolsAndContextMenu()
+app.on('ready', () => {
+  setupDevtoolsAndContextMenu()
 
   const shortcut = config.get('shortcut')
   for (const name in shortcut) {
