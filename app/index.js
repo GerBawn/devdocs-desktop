@@ -1,17 +1,12 @@
 const path = require('path')
-const { app, BrowserWindow, Menu } = require('electron')
+const {app, BrowserWindow, Menu, ipcMain, shell} = require('electron')
 const debug = require('debug')('devdocs-desktop:index')
 const createMenu = require('./menu')
 const config = require('./config')
 const tray = require('./tray')
 const updater = require('./updater')
-const { toggleGlobalShortcut } = require('./utils')
+const {toggleGlobalShortcut} = require('./utils')
 const login = require('./login')
-
-require('electron-debug')()
-require('electron-context-menu')({
-  showInspectElement: true,
-})
 
 app.setAppUserModelId('sh.egoist.devdocs')
 
@@ -56,14 +51,15 @@ function createMainWindow() {
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     trafficLightPosition: {
       x: 10,
-      y: 10,
+      y: 10
     },
     webPreferences: {
+      // Local shell UI only (not remote content). Remote DevDocs runs inside <webview>.
       nodeIntegration: true,
-      webviewTag: true,
       contextIsolation: false,
-      enableRemoteModule: true,
-    },
+      webviewTag: true,
+      sandbox: false
+    }
   })
 
   if (process.platform === 'darwin') {
@@ -72,7 +68,7 @@ function createMainWindow() {
 
   win.loadFile(path.join(__dirname, 'renderer/index.html'))
 
-  win.on('close', e => {
+  win.on('close', (e) => {
     if (!isQuitting) {
       e.preventDefault()
 
@@ -87,13 +83,55 @@ function createMainWindow() {
   return win
 }
 
-app.on('login', (event, webContents, request, authInfo, cb) => {
-  debug('app.on(login)')
-  event.preventDefault()
-  login(cb)
+function setupDevtoolsAndContextMenu() {
+  // Local helpers — do not use electron-debug / electron-context-menu
+  // (they depend on electron-is-dev, which breaks in packaged builds).
+  const {registerDevShortcuts} = require('./dev-shortcuts')
+  const {registerContextMenu} = require('./context-menu')
+  registerDevShortcuts()
+  registerContextMenu({showInspectElement: !app.isPackaged})
+}
+
+app.on(
+  'login',
+  (event, _webContents, _authenticationResponseDetails, _authInfo, cb) => {
+    debug('app.on(login)')
+    event.preventDefault()
+    login(cb)
+  }
+)
+
+// Open external links from <webview> guests (replaces removed webview "new-window" event)
+app.on('web-contents-created', (_event, contents) => {
+  if (contents.getType() === 'webview') {
+    contents.setWindowOpenHandler(({url}) => {
+      shell.openExternal(url)
+      return {action: 'deny'}
+    })
+  }
+})
+
+ipcMain.on('window-maximize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) {
+    if (win.isMaximized()) {
+      win.unmaximize()
+    } else {
+      win.maximize()
+    }
+  }
+})
+
+ipcMain.on('window-set-title', (event, title) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) {
+    win.setTitle(title)
+  }
 })
 
 app.on('ready', () => {
+  setupDevtoolsAndContextMenu()
+
   const shortcut = config.get('shortcut')
   for (const name in shortcut) {
     const accelerator = shortcut[name]
@@ -102,15 +140,15 @@ app.on('ready', () => {
         name,
         accelerator,
         registered: false,
-        action: toggleWindow,
+        action: toggleWindow
       })
     }
   }
 
   Menu.setApplicationMenu(
     createMenu({
-      toggleWindow,
-    }),
+      toggleWindow
+    })
   )
   mainWindow = createMainWindow()
   tray.create(mainWindow)
@@ -125,7 +163,9 @@ app.on('ready', () => {
 })
 
 app.on('activate', () => {
-  mainWindow.show()
+  if (mainWindow) {
+    mainWindow.show()
+  }
 })
 
 // I have no idea what I'm doing here
@@ -133,7 +173,9 @@ app.on('activate', () => {
 let hasOpenedOnce
 app.on('browser-window-focus', () => {
   if (hasOpenedOnce) {
-    mainWindow.webContents.send('focus-webview')
+    if (mainWindow) {
+      mainWindow.webContents.send('focus-webview')
+    }
   } else {
     hasOpenedOnce = true
   }
@@ -142,7 +184,7 @@ app.on('browser-window-focus', () => {
 app.on('before-quit', () => {
   isQuitting = true
 
-  if (!mainWindow.isFullScreen()) {
+  if (mainWindow && !mainWindow.isFullScreen()) {
     config.set('lastWindowState', mainWindow.getBounds())
   }
 })
@@ -151,6 +193,7 @@ app.setAsDefaultProtocolClient('devdocs')
 
 app.on('will-finish-launching', () => {
   app.on('open-url', (e, url) => {
+    e.preventDefault()
     if (mainWindow) {
       mainWindow.webContents.send('link', url)
     } else {

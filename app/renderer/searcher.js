@@ -54,7 +54,7 @@ module.exports = class Searcher extends EventEmitter {
     this.$searcher = $wrapper.querySelector('.searcher')
     this.$progress = this.$searcher.querySelector('.searcher-progress')
     this.$input = this.$searcher.querySelector('.searcher-input')
-    this.$input.addEventListener('keydown', e => {
+    this.$input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         // Enter
         this.findNext(e.target.value)
@@ -76,8 +76,8 @@ module.exports = class Searcher extends EventEmitter {
       this.close()
     })
 
-    this.target.addEventListener('found-in-page', e => {
-      const { matches, activeMatchOrdinal } = e.result
+    this.target.addEventListener('found-in-page', (e) => {
+      const {matches, activeMatchOrdinal} = e.result
 
       this.showProgress(activeMatchOrdinal, matches)
       this.$input.focus()

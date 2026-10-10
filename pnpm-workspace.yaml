@@ -1,0 +1,15 @@
+packages:
+  - .
+  - app
+
+# pnpm 12 blocks dependency install scripts until approved.
+# Electron packaging needs these allowed for electron-builder postinstall.
+allowBuilds:
+  electron: true
+  electron-winstaller: true
+  '@electron/rebuild': true
+
+# Allow recently published packages used by this project (pnpm 12 supply-chain age gate).
+minimumReleaseAgeExclude:
+  - dotenv
+  - prettier

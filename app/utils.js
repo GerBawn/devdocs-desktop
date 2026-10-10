@@ -1,6 +1,6 @@
 const os = require('os')
 const path = require('path')
-const { globalShortcut } = require('electron')
+const {globalShortcut} = require('electron')
 const config = require('./config')
 
 const home = os.homedir()
