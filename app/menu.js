@@ -9,10 +9,14 @@ const axios = require('axios')
 const semverCompare = require('semver-compare')
 const { configDir, toggleGlobalShortcut } = require('./utils')
 const config = require('./config')
-const pkg = require('./package')
+const pkg = require('./package.json')
 
 function sendAction(action, ...args) {
   const [win] = BrowserWindow.getAllWindows()
+
+  if (!win) {
+    return
+  }
 
   if (process.platform === 'darwin') {
     win.restore()
@@ -39,13 +43,13 @@ function createMenu(opts) {
         {
           label: 'Custom CSS',
           click() {
-            shell.openItem(configDir('custom.css'))
+            shell.openPath(configDir('custom.css'))
           }
         },
         {
           label: 'Custom JS',
           click() {
-            shell.openItem(configDir('custom.js'))
+            shell.openPath(configDir('custom.js'))
           }
         },
         {
@@ -75,31 +79,35 @@ function createMenu(opts) {
       if (!focusedWindow) return
 
       const api =
-        'https://api.github.com/repos/egoist/devdocs-desktop/releases/latest'
-      const latest = await axios.get(api).then(res => res.data)
+        'https://api.github.com/repos/GerBawn/devdocs-desktop/releases/latest'
+      try {
+        const latest = await axios.get(api).then(res => res.data)
 
-      if (semverCompare(latest.tag_name.slice(1), pkg.version) === 1) {
-        dialog.showMessageBox(
-          focusedWindow,
-          {
+        if (semverCompare(latest.tag_name.slice(1), pkg.version) === 1) {
+          const { response } = await dialog.showMessageBox(focusedWindow, {
             type: 'info',
             message: 'New updates!',
             detail: `A new release (${latest.tag_name}) is available, view more details?`,
             buttons: ['OK', 'Cancel'],
-            defaultId: 0
-          },
-          selected => {
-            if (selected === 0) {
-              shell.openExternal(
-                'https://github.com/egoist/devdocs-desktop/releases/latest'
-              )
-            }
+            defaultId: 0,
+            cancelId: 1
+          })
+          if (response === 0) {
+            shell.openExternal(
+              'https://github.com/GerBawn/devdocs-desktop/releases/latest'
+            )
           }
-        )
-      } else {
-        dialog.showMessageBox(focusedWindow, {
-          message: 'No updates!',
-          detail: `v${pkg.version} is already the latest version.`
+        } else {
+          await dialog.showMessageBox(focusedWindow, {
+            message: 'No updates!',
+            detail: `v${pkg.version} is already the latest version.`
+          })
+        }
+      } catch (error) {
+        await dialog.showMessageBox(focusedWindow, {
+          type: 'error',
+          message: 'Update check failed',
+          detail: error.message || String(error)
         })
       }
     }
@@ -128,13 +136,13 @@ function createMenu(opts) {
           role: 'paste'
         },
         {
-          role: 'pasteandmatchstyle'
+          role: 'pasteAndMatchStyle'
         },
         {
           role: 'delete'
         },
         {
-          role: 'selectall'
+          role: 'selectAll'
         }
       ]
     },
@@ -169,7 +177,7 @@ function createMenu(opts) {
           label: 'Search In Page',
           accelerator: 'CmdOrCtrl+F',
           click(item, focusedWindow) {
-            focusedWindow.webContents.send('open-search')
+            if (focusedWindow) focusedWindow.webContents.send('open-search')
           }
         },
         {
@@ -218,8 +226,7 @@ function createMenu(opts) {
         },
         ...preferences,
         {
-          role: 'services',
-          submenu: []
+          role: 'services'
         },
         {
           type: 'separator'
@@ -228,7 +235,7 @@ function createMenu(opts) {
           role: 'hide'
         },
         {
-          role: 'hideothers'
+          role: 'hideOthers'
         },
         {
           role: 'unhide'
@@ -250,10 +257,10 @@ function createMenu(opts) {
         label: 'Speech',
         submenu: [
           {
-            role: 'startspeaking'
+            role: 'startSpeaking'
           },
           {
-            role: 'stopspeaking'
+            role: 'stopSpeaking'
           }
         ]
       }
@@ -296,7 +303,7 @@ function createMenu(opts) {
         label: 'Report Issues',
         click() {
           shell.openExternal(
-            'http://github.com/egoist/devdocs-desktop/issues/new'
+            'https://github.com/GerBawn/devdocs-desktop/issues/new'
           )
         }
       }

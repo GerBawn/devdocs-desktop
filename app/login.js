@@ -8,12 +8,17 @@ module.exports = cb => {
     width: 300,
     height: 300,
     frame: false,
-    resizable: false
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      sandbox: false
+    }
   })
-  loginWindow.loadURL(`file://${path.join(__dirname, '/renderer/login.html')}`)
+  loginWindow.loadFile(path.join(__dirname, 'renderer/login.html'))
 
   ipcMain.once('login-message', (event, usernameAndPassword) => {
-    debug('Login message recieved', usernameAndPassword[0])
+    debug('Login message received', usernameAndPassword[0])
     cb(usernameAndPassword[0], usernameAndPassword[1])
     loginWindow.close()
   })
