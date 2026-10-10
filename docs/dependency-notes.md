@@ -20,12 +20,12 @@
 
 - `eslint@^10` + `eslint.config.mjs` (flat config)
 - `@eslint/js`, `globals`, `eslint-config-prettier`
-- `prettier@^3` (`npm run format`)
-- Scripts: `npm run lint` → `eslint .`
+- `prettier@^3` (`pnpm run format`)
+- Scripts: `pnpm run lint` → `eslint .`
 
 ## Install deprecations that may remain
 
-A clean `npm install` should **no longer** warn about:
+A clean `pnpm install` should **no longer** warn about:
 
 - `eslint@8.57.1`
 - `@humanwhocodes/config-array`
@@ -38,3 +38,14 @@ A clean `npm install` should **no longer** warn about:
 - `glob@7` / `inflight` / `boolean` via the same packaging toolchain
 
 Those are not from our lint stack.
+
+
+## Package manager
+
+This repo uses **pnpm** (`packageManager` in root `package.json`).
+
+- Lockfile: `pnpm-lock.yaml` (do not commit `package-lock.json`)
+- Workspace: root + `app/` (`pnpm-workspace.yaml`)
+- `.npmrc`: `node-linker=hoisted` so electron-builder can resolve/pack deps
+- `pnpm-workspace.yaml` `allowBuilds`: `electron`, `electron-winstaller`, `@electron/rebuild` (pnpm 12 blocks install scripts until approved)
+- `minimumReleaseAgeExclude`: `dotenv`, `prettier` (pnpm 12 supply-chain age gate)

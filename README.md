@@ -14,6 +14,7 @@
 - **打包**：`electron-builder` 升级到 `26.x`，macOS 同时产出 **arm64** 与 **x64** 的 DMG/ZIP
 - **兼容性目标**：macOS Sonoma / Sequoia 及更新版本，Apple Silicon 与 Intel
 - **未内置 Apple 签名密钥**：本地可先打未签名包验证；正式分发需要你自己的 Developer ID + 公证（见下文）
+- **包管理器**：已从 npm 切换为 **pnpm**（`.npmrc` 使用 `node-linker=hoisted` 以兼容 electron-builder）
 
 ## Features
 
@@ -46,15 +47,15 @@ Use <kbd>Ctrl+Shift+D</kbd> (or <kbd>Command+Shift+D</kbd> on macOS) to toggle t
 
 ## Development（本地开发）
 
-需要 **Node.js 22.12+**（Electron 44 要求；推荐 Node 22 LTS）。
+需要 **Node.js 22.12+**（Electron 44 要求；推荐 Node 22 LTS）与 **pnpm**（仓库 `packageManager` 已固定版本；可用 `corepack enable && corepack prepare`）。
 
 依赖升级说明与刻意 pin 的包见 [docs/dependency-notes.md](./docs/dependency-notes.md)。
 
 ```bash
 git clone https://github.com/GerBawn/devdocs-desktop.git
 cd devdocs-desktop
-npm install
-npm run app
+pnpm install
+pnpm run app
 ```
 
 编辑 `app/` 下文件后刷新窗口即可；无需 Webpack。
@@ -63,7 +64,7 @@ npm run app
 
 在真实 Mac（Sonoma / Sequoia，arm64 或 Intel）上请确认：
 
-1. `npm run app` 能打开窗口并加载 https://devdocs.io
+1. `pnpm run app` 能打开窗口并加载 https://devdocs.io
 2. 关闭窗口后应用仍留在 Dock；点击 Dock 图标可恢复
 3. 全局快捷键 <kbd>Cmd+Shift+D</kbd>（需在菜单里 Enable Global Shortcut）可显示/隐藏
 4. 页内搜索 <kbd>Cmd+F</kbd>、缩放、暗色模式切换正常
@@ -79,7 +80,7 @@ npm run app
 在 **macOS** 上：
 
 ```bash
-npm run dist:mac:unsigned
+pnpm run dist:mac:unsigned
 ```
 
 产物在 `dist/`（arm64 / x64 的 dmg 与 zip）。
@@ -87,7 +88,7 @@ npm run dist:mac:unsigned
 仅生成目录而不打包安装器：
 
 ```bash
-npm run pack
+pnpm run pack
 ```
 
 ### 签名 + 公证（正式发布）
@@ -104,7 +105,7 @@ export CSC_KEY_PASSWORD='...'
 export APPLE_ID='you@example.com'
 export APPLE_APP_SPECIFIC_PASSWORD='...'
 export APPLE_TEAM_ID='XXXXXXXXXX'
-npm run dist:mac
+pnpm run dist:mac
 ```
 
 `scripts/notarize.js` 会在缺少上述变量时 **自动跳过公证**，因此 CI/本地未配置密钥时仍可完成构建。

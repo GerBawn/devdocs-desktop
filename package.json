@@ -12,7 +12,7 @@
   "main": "app/index.js",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "test": "npm run lint",
+    "test": "pnpm run lint",
     "lint": "eslint .",
     "app": "DEBUG=devdocs-desktop:* electron app/index.js",
     "pack": "electron-builder --dir",
@@ -101,5 +101,6 @@
   },
   "engines": {
     "node": ">=22.12.0"
-  }
+  },
+  "packageManager": "pnpm@12.10.1"
 }
